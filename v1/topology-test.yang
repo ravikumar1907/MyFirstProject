@@ -1,0 +1,63 @@
+module gemini {
+  yang-version 1.1;
+  namespace "https://github.com/SpirentOrion/gemini/model/test";
+  prefix tt;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import test-endpoint {
+    prefix ttep;
+  }
+  import topology {
+    prefix tttp;
+  }
+
+  organization
+    "Spirent";
+  contact
+    "Spirent";
+  description
+    "This module is the top level of the test hierarchy.";
+
+ revision 2021-01-06 {
+    description
+      "Removed topology group and moved topology under test.";
+    reference
+      "0.0.2";
+  }
+
+  revision 2020-12-22 {
+    description
+      "Initial revision.";
+    reference
+      "0.0.1";
+  }
+
+  list spirent-test {
+    key "id";
+    leaf id {
+      type yang:uuid;
+      mandatory true;
+      description
+        "UUID.";
+    }
+    leaf name {
+      type string;
+      default "";
+      description
+        "The name of the test.";
+    }
+    list spirent-endpoints {
+      key "id";
+      uses ttep:endpoint-group;
+      description
+        "Global end-point collection";
+    }
+    list spirent-topologies{
+      key "id";
+      uses tttp:topology;
+    }
+
+  }
+}
