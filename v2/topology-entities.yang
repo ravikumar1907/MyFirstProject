@@ -1,0 +1,311 @@
+module topology-entities {
+  namespace "https://github.com/SpirentOrion/gemini/model/test/topology-entities";
+  prefix ttte;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  import traffic-app-data-types {
+    prefix ta;
+  }
+
+  organization
+    "Spirent";
+  contact
+    "Spirent";
+  description
+    "This module defines topology entities .";
+
+  revision 2020-11-19 {
+    description
+      "Initial revision.";
+    reference
+      "0.0.1";
+  }
+
+  grouping step-group {
+    description
+      "Step details to compute various entities. ";
+    leaf type {
+      type enumeration {
+        enum PORT {
+          description
+            "";
+        }
+        enum DEVICE {
+          description
+            "";
+        }
+      }
+      description
+        "Types of entities for which multi-values applies..";
+    }
+    leaf step {
+      type string;
+    }
+  }
+
+
+  grouping base-pattern-group {
+    description
+      "Base patterns for types such as decimal, ipv4, mac, ipv6
+       The pattern is dependent on the re-match() function which allows this pattern group to be extended by models based on the type.
+       Models will create a container which will use a pattern-group. The container will then refine the pattern-format default.
+       The pattern group is extended in this module to provide some common pattern types such as decimal, mac, ipv4, ipv6.
+      ";
+    leaf pattern-type {
+      type enumeration {
+        enum SINGLE {
+          description
+            "";
+        }
+        enum COUNTER {
+          description
+            "";
+        }
+        enum LIST {
+          description
+            "";
+        }
+      }
+      default "SINGLE";
+      description
+        "The selected pattern from the possible pattern types.";
+    }
+    leaf pattern-format {
+      type string;
+      config false;
+      description
+        "The format of the pattern.
+         This will almost always be a regular expression.
+         It is used to determine the validity of the values being set in the child leaf nodes of the pattern.";
+    }
+    leaf value-length {
+      type int32;
+      config false;
+      description
+        "The length of the value in bits.
+         It can be used to determine the overflow condition during step calculation.";
+    }
+    leaf single-value {
+      when "../pattern-type = 'SINGLE'";
+      type string;
+      description
+        "The value of the single pattern";
+    }
+    container counter {
+      when "../pattern-type = 'COUNTER'";
+      description
+        "The values that make up the increment pattern";
+      leaf start {
+        type string;
+        description
+          "The start value of the increment pattern";
+      }
+      leaf step {
+        type string;
+        description
+          "The step value of the increment pattern";
+      }
+      list nested-steps {
+        key "type";
+        uses step-group;
+      }
+    }
+    leaf-list list {
+      when "../pattern-type = 'LIST'";
+      type string;
+      description
+        "The list values for entities.";
+    }
+  }
+
+  grouping mac-pattern-group {
+    description
+      "Overide the pattern-format that is suitable for the mac address.";
+    uses base-pattern-group {
+      refine "pattern-format" {
+        default "^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$";
+      }
+    }
+  }
+
+
+  grouping ethernet-if-group {
+    description
+      "Configuration for ethernet";
+    container ethernet {
+      description
+        "";
+      leaf id {
+        type yang:uuid;
+        mandatory true;
+        description
+          "Id for the mac address (UUID).";
+      }
+      container mac {
+        description
+          "The mac address";
+        uses mac-pattern-group;
+      }
+    }
+  }
+
+  grouping vlan-if-list {
+      list vlans {
+        key "id";
+        uses ttte:vlan-if-group;
+      }
+  }
+
+  grouping vlan-if-group {
+    description
+      "Configuration for vlan";
+    leaf id {
+      type yang:uuid;
+      mandatory true;
+      description
+        "Vlan entity id (UUID).";
+    }
+    container vlan {
+      description
+        "";
+      container vlan-id {
+        description
+          "VLAN id";
+        uses base-pattern-group {
+          refine "pattern-format" {
+            default "0..4094";
+          }
+          refine "value-length" {
+            default "12";
+          }
+          refine "single-value" {
+            default "1";
+          }
+        }
+      }
+      leaf tpid {
+        type ta:tpid-type;
+        default "0X8100";
+      }
+      leaf priority {
+        type ta:priority-type;
+        default "1";
+      }
+    }
+  }
+
+  grouping ipv4-pattern-group {
+    description
+      "Overide the pattern format to suit ipv4";
+    uses base-pattern-group {
+      refine "pattern-format" {
+        default "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+      }
+    }
+  }
+
+  grouping ipv6-pattern-group {
+    description
+      "Overide the pattern format to suit ipv6";
+    uses base-pattern-group {
+      refine "pattern-format" {
+        default "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+
+
+      }
+    }
+  }
+
+  grouping ipv4-if-group {
+    description
+      "";
+    container ipv4 {
+      description
+        "";
+      leaf id {
+        type yang:uuid;
+        mandatory true;
+        description
+          "UUID.";
+      }
+      container address {
+        description
+          "";
+        uses ipv4-pattern-group {
+          refine "single-value" {
+            default "192.85.1.3";
+          }
+          refine "value-length" {
+            default "32";
+          }
+        }
+      }
+      container gateway-address {
+        description
+          "";
+        uses ipv4-pattern-group {
+          refine "single-value" {
+            default "192.85.1.1";
+          }
+          refine "value-length" {
+            default "32";
+          }
+        }
+      }
+      leaf prefix {
+        type ta:prefix32;
+        default "24";
+      }
+      leaf ToS {
+        type ta:hex-number-8-bit;
+        default "0xC0";
+        description
+          "Quality of service.";
+      }
+    }
+  }
+
+
+  grouping ipv6-if-group {
+    description
+      "";
+    container ipv6 {
+      description
+        "";
+      leaf id {
+        type yang:uuid;
+        mandatory true;
+        description
+          "UUID.";
+      }
+      container address {
+        description
+          "";
+        uses ipv6-pattern-group;
+      }
+      container gateway-address {
+        description
+          "";
+        uses ipv6-pattern-group;
+      }
+      container link-local-address {
+        description
+          "";
+        uses ipv6-pattern-group;
+      }
+      leaf prefix {
+        type ta:prefix128;
+        default "64";
+      }
+      leaf traffic-class {
+        type ta:hex-number-8-bit;
+        default "0x0";
+        description
+          "Quality of service.";
+      }
+    }
+  }
+}

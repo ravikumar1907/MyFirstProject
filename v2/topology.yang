@@ -1,0 +1,94 @@
+module topology {
+  namespace "https://github.com/SpirentOrion/gemini/model/test/topology";
+  prefix tttp;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import topology-entities {
+    prefix ttte;
+  }
+  import test-endpoint {
+    prefix ttep;
+  }
+
+  organization
+    "Spirent";
+  contact
+    "Spirent";
+  description
+    "This module is the top level of the test hierarchy.";
+
+  revision 2021-01-06 {
+    description
+      "Removed topology group and also move the in-use port collection to topology.";
+    reference
+      "0.0.2";
+  }
+  
+  revision 2020-12-22 {
+    description
+      "Initial revision.";
+    reference
+      "0.0.1";
+  }
+
+
+  grouping networkdevice {
+    description
+      "";
+    leaf id {
+      type yang:uuid;
+      mandatory true;
+      description
+        "Id of the network device.";
+    }
+    leaf count-per-endpoint {
+      type uint32;
+      mandatory true;
+      description
+        "The device/host count per port.";
+    }
+    uses ttte:ethernet-if-group;
+    uses ttte:vlan-if-list;
+    uses ttte:ipv4-if-group;
+    uses ttte:ipv6-if-group;
+  }
+
+  grouping topology {
+    leaf id {
+      type yang:uuid;
+      mandatory true;
+      description
+        "uuid";
+    }
+    leaf topology-type {
+      type enumeration {
+        enum T1 {
+          description
+            "T1 topology";
+        }
+        enum T2 {
+          description
+            "T2 topology";
+        }
+      }
+      description
+        "Type of topology";
+    }
+
+
+    leaf name {
+      type string;
+      mandatory true;
+      description
+        "Topology name";
+    }
+    list spirent-hosts {
+      key "id";
+      uses networkdevice;
+    }
+
+    uses ttep:endpoint-inuse-group;
+  }
+}

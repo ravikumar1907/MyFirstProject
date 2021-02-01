@@ -1,0 +1,58 @@
+module test-endpoint {
+  namespace "https://github.com/SpirentOrion/gemini/model/test/endpoints";
+  prefix ttep;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Spirent";
+  contact
+    "Spirent";
+  description
+    "This module describes end points like ports.";
+
+  revision 2020-12-22 {
+    description
+      "Initial revision.";
+    reference
+      "0.0.1";
+  }
+
+  grouping endpoint-group {
+    description
+      "A grouping of test endpoints (ports).";
+    leaf id {
+      type yang:uuid;
+      mandatory true;
+      description
+        "UUID.";
+    }
+    leaf location {
+      type string;
+      default "";
+      description
+        "The location of the physical or virtual port that will be connected to this abstract port.
+         The value pattern must be chassis/card/port where chassis is an ipv4/ipv6 address and card/port are unsigned byte 1-255.
+         The separator between the chassis/card/port values must be a forward slash.";
+    }
+    leaf name {
+      type string;
+      default "";
+      description
+        "Name of the endpoint";
+    }
+
+  }
+
+  grouping endpoint-inuse-group {
+    description
+      "A grouping of test endpoints (ports).";
+    leaf-list assigned-endpoints {
+      type yang:uuid;
+      description
+        "A list of end point assigned to a group.";
+    }
+  }
+}
