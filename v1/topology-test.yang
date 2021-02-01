@@ -1,5 +1,4 @@
 module gemini {
-  yang-version 1.1;
   namespace "https://github.com/SpirentOrion/gemini/model/test";
   prefix tt;
 
