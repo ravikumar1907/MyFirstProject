@@ -1,0 +1,25 @@
+{
+         "assigned-endpoints":[
+            "879aecf6-581c-4b93-9116-6aaa86650e1e"
+         ],
+         "spirent-hosts":[
+            {
+               "count-per-endpoint":2,
+               "id":"3129b109-14b6-4f8c-a451-754af14e411d",
+               "ethernet":{
+                  "id":"3129b109-14c6-4f8c-a451-754af14e411d",
+                  "mac":{
+                     "counter":{
+                        "start":"00:0a:95:9d:68:16",
+                        "step":"00:00:00:00:00:01"
+                     },
+                     "pattern-type":"COUNTER",
+                     "value-length":48
+                  }
+	       }
+	    }
+	 ],
+	  "id":"3129a109-14b6-4f8c-a451-754af14e411d",
+         "name":"test-topo-1",
+         "topology-type":"T1"
+}
